@@ -1,0 +1,56 @@
+{
+  "name": "n8n-nodes-scrapybara",
+  "version": "0.1.0",
+  "description": "n8n nodes for integrating with Scrapybara API",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-nodes-scrapybara",
+    "scrapybara"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/filipexyz/n8n-nodes-scrapybara",
+  "author": {
+    "name": "Luis Filipe",
+    "email": "luis@filipe.xyz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/filipexyz/n8n-nodes-scrapybara.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier --write .",
+    "lint": "eslint nodes credentials --ext .ts",
+    "lintfix": "eslint nodes credentials --ext .ts --fix",
+    "prepublishOnly": "pnpm build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ScrapybaraApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Scrapybara/Scrapybara.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/request-promise-native": "^1.0.21",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^4.0.2",
+    "n8n-core": "^1.14.1",
+    "n8n-workflow": "^1.70.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "scrapybara": "^2.3.0"
+  }
+}

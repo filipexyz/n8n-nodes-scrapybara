@@ -1,0 +1,21 @@
+{
+	"node": "n8n-nodes-base.scrapybara",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": [
+		"Development",
+		"Utility"
+	],
+	"resources": {
+		"primaryDocumentation": [
+			{
+				"url": "https://scrapybara.com/docs"
+			}
+		],
+		"credentialDocumentation": [
+			{
+				"url": "https://scrapybara.com/docs"
+			}
+		]
+	}
+} 
