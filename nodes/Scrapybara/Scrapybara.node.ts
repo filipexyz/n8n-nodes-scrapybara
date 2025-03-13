@@ -396,28 +396,28 @@ export class Scrapybara implements INodeType {
 					else if (operation === 'stop') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								await clientAny.instance(instanceId).stop();
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								await clientAny.instances[instanceId].stop();
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].stop === 'function') {
 								await clientAny[instanceId].stop();
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = { success: true, instanceId };
 						} catch (error) {
-							throw new Error(`Falha ao parar instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to stop instance ${instanceId}: ${error.message}`);
 						}
 					}
 					
@@ -425,28 +425,28 @@ export class Scrapybara implements INodeType {
 					else if (operation === 'pause') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								await clientAny.instance(instanceId).pause();
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								await clientAny.instances[instanceId].pause();
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].pause === 'function') {
 								await clientAny[instanceId].pause();
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = { success: true, instanceId };
 						} catch (error) {
-							throw new Error(`Falha ao pausar instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to pause instance ${instanceId}: ${error.message}`);
 						}
 					}
 					
@@ -455,28 +455,28 @@ export class Scrapybara implements INodeType {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						const timeoutHours = this.getNodeParameter('timeoutHours', i, 1) as number;
 						try {
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								await clientAny.instance(instanceId).resume({ timeoutHours });
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								await clientAny.instances[instanceId].resume({ timeoutHours });
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].resume === 'function') {
 								await clientAny[instanceId].resume({ timeoutHours });
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = { success: true, instanceId };
 						} catch (error) {
-							throw new Error(`Falha ao retomar instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to resume instance ${instanceId}: ${error.message}`);
 						}
 					}
 					
@@ -485,28 +485,28 @@ export class Scrapybara implements INodeType {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
 							let response;
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								response = await clientAny.instance(instanceId).screenshot();
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								response = await clientAny.instances[instanceId].screenshot();
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].screenshot === 'function') {
 								response = await clientAny[instanceId].screenshot();
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = response as unknown as IDataObject;
 						} catch (error) {
-							throw new Error(`Falha ao capturar screenshot da instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to capture screenshot of instance ${instanceId}: ${error.message}`);
 						}
 					}
 					
@@ -515,28 +515,28 @@ export class Scrapybara implements INodeType {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
 							let response;
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								response = await clientAny.instance(instanceId).getStreamUrl();
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								response = await clientAny.instances[instanceId].getStreamUrl();
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].getStreamUrl === 'function') {
 								response = await clientAny[instanceId].getStreamUrl();
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = response as unknown as IDataObject;
 						} catch (error) {
-							throw new Error(`Falha ao obter stream URL da instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to get stream URL of instance ${instanceId}: ${error.message}`);
 						}
 					}
 					
@@ -548,28 +548,28 @@ export class Scrapybara implements INodeType {
 						
 						try {
 							let response;
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								response = await clientAny.instance(instanceId).bash({ command, restart });
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								response = await clientAny.instances[instanceId].bash({ command, restart });
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].bash === 'function') {
 								response = await clientAny[instanceId].bash({ command, restart });
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = response as unknown as IDataObject;
 						} catch (error) {
-							throw new Error(`Falha ao executar comando bash na instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to execute bash command on instance ${instanceId}: ${error.message}`);
 						}
 					}
 					
@@ -604,28 +604,28 @@ export class Scrapybara implements INodeType {
 						
 						try {
 							let response;
-							// Tenta diferentes abordagens para acessar e manipular a instância
+							// Try different approaches to access and manipulate the instance
 							const clientAny = client as any;
 							
-							// Abordagem 1: Tenta usar método instance() se existir
+							// Approach 1: Try to use instance() method if exists
 							if (typeof clientAny.instance === 'function') {
 								response = await clientAny.instance(instanceId).computer(payload);
 							}
-							// Abordagem 2: Tenta acessar map de instances
+							// Approach 2: Try to access instances map
 							else if (clientAny.instances && clientAny.instances[instanceId]) {
 								response = await clientAny.instances[instanceId].computer(payload);
 							}
-							// Abordagem 3: Tenta acessar diretamente via indexador
+							// Approach 3: Try to access directly via indexer
 							else if (clientAny[instanceId] && typeof clientAny[instanceId].computer === 'function') {
 								response = await clientAny[instanceId].computer(payload);
 							}
-							// Nenhuma abordagem funcionou
+							// No approach worked
 							else {
-								throw new Error(`Não foi possível encontrar ou manipular a instância ${instanceId}`);
+								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
 							}
 							responseData = response as unknown as IDataObject;
 						} catch (error) {
-							throw new Error(`Falha ao executar ação de computador na instância ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to execute computer action on instance ${instanceId}: ${error.message}`);
 						}
 					}
 				}
