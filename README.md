@@ -9,6 +9,39 @@ This is an n8n community node for interacting with the [Scrapybara](https://scra
 - **Remote Desktop Actions**: Take screenshots, get stream URLs, run bash commands, perform computer actions
 - **Computer Control**: Execute mouse and keyboard actions programmatically
 
+## Current Development Status
+
+### Instance Management
+- [x] List instances
+- [x] Start instances (Ubuntu, Browser, Windows)
+- [x] Stop instances
+- [x] Pause instances
+- [x] Resume instances
+- [x] Screenshot functionality
+- [x] Get stream URL
+- [x] Run bash commands
+- [x] Basic computer actions (mouse/keyboard)
+
+### Code Execution
+- [ ] Execute code without notebook
+
+### Notebook Support
+- [ ] Create, manage, and execute notebooks
+
+### Browser Authentication
+- [ ] Save and reuse browser authentication states
+
+### File Management
+- [ ] Upload/download files
+
+### Environment Variables
+- [ ] Manage environment variables
+
+### Computer Control
+- [x] Basic mouse/keyboard interactions
+- [ ] Advanced mouse/keyboard interactions
+- [ ] Enhanced UI interactions
+
 ## Prerequisites
 
 - n8n v1.0+

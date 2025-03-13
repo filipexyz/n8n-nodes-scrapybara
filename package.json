@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-scrapybara",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "n8n nodes for integrating with Scrapybara API",
   "keywords": [
     "n8n-community-node-package",
@@ -51,6 +51,6 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "scrapybara": "^2.3.0"
+    "scrapybara": "^2.4.1"
   }
 }

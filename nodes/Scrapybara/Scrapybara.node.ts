@@ -7,7 +7,8 @@ import {
 	NodeConnectionType,
 } from 'n8n-workflow';
 
-import { ScrapybaraClient } from 'scrapybara';
+import { ScrapybaraClient, UbuntuInstance } from 'scrapybara';
+import { BashRequest } from 'scrapybara/api/resources/instance';
 
 export class Scrapybara implements INodeType {
 	description: INodeTypeDescription = {
@@ -37,6 +38,7 @@ export class Scrapybara implements INodeType {
 				required: true,
 			},
 		],
+		
 		properties: [
 			{
 				displayName: 'Resource',
@@ -64,6 +66,12 @@ export class Scrapybara implements INodeType {
 					},
 				},
 				options: [
+					{
+						name: 'List Instances',
+						value: 'listInstances',
+						description: 'List all instances',
+						action: 'List all instances',
+					},
 					{
 						name: 'Start',
 						value: 'start',
@@ -222,6 +230,7 @@ export class Scrapybara implements INodeType {
 				default: false,
 				description: 'Whether to restart the shell',
 			},
+			
 
 			// COMPUTER ACTION
 			{
@@ -252,29 +261,9 @@ export class Scrapybara implements INodeType {
 						description: 'Move mouse cursor to specific coordinates',
 					},
 					{
-						name: 'Left Click Drag',
-						value: 'left_click_drag',
-						description: 'Click and drag from current position to specified coordinates',
-					},
-					{
-						name: 'Left Click',
-						value: 'left_click',
-						description: 'Perform a left mouse click at current position',
-					},
-					{
-						name: 'Right Click',
-						value: 'right_click',
-						description: 'Perform a right mouse click at current position',
-					},
-					{
-						name: 'Middle Click',
-						value: 'middle_click',
-						description: 'Perform a middle mouse click at current position',
-					},
-					{
-						name: 'Double Click',
-						value: 'double_click',
-						description: 'Perform a double left click at current position',
+						name: 'Mouse Click',
+						value: 'mouse_click',
+						description: 'Click at current position',
 					},
 					{
 						name: 'Screenshot',
@@ -289,7 +278,7 @@ export class Scrapybara implements INodeType {
 					{
 						name: 'Wait',
 						value: 'wait',
-						description: 'Wait for 3 seconds',
+						description: 'Wait for n seconds',
 					},
 					{
 						name: 'Scroll',
@@ -297,7 +286,7 @@ export class Scrapybara implements INodeType {
 						description: 'Scroll horizontally and/or vertically',
 					},
 				],
-				default: 'left_click',
+				default: 'key',
 			},
 			{
 				displayName: 'Text',
@@ -308,17 +297,107 @@ export class Scrapybara implements INodeType {
 					show: {
 						resource: ['instance'],
 						operation: ['computerAction'],
-						computerAction: ['key', 'type'],
+						computerAction: ['type'],
 					},
 				},
 				default: '',
 				description: 'Text to type or key combination to press',
 			},
 			{
+				displayName: 'Keys',
+				name: 'keys',
+				type: 'string',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['instance'],
+						operation: ['computerAction'],
+						computerAction: ['key'],
+					},
+				},
+				default: '',
+				description: 'Keys to press (separated by commas)',
+			},
+			{
+				displayName: 'Button',
+				name: 'button',
+				type: 'options',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['instance'],
+						operation: ['computerAction'],
+						computerAction: ['mouse_click'],
+					},
+				},
+				options: [
+					{
+						name: 'Left',
+						value: 'left',
+						description: 'Left mouse button',
+					},
+					{
+						name: 'Right',
+						value: 'right',
+						description: 'Right mouse button',
+					},
+					{
+						name: 'Middle',
+						value: 'middle',
+						description: 'Middle mouse button',
+					},
+					{
+						name: 'Back',
+						value: 'back',
+						description: 'Back mouse button',
+					},
+					{
+						name: 'Forward',
+						value: 'forward',
+						description: 'Forward mouse button',
+					},
+				],
+				default: 'left',
+			},
+			{
+				displayName: 'Number of Clicks',
+				name: 'numClicks',
+				type: 'number',
+				default: 1,
+				required: false,
+				description: 'Number of clicks to perform',
+				displayOptions: {
+					show: {
+						resource: ['instance'],
+						operation: ['computerAction'],
+						computerAction: ['mouse_click'],
+					},
+				},
+			},
+			{
+				displayName: 'Hold Keys',
+				name: 'holdKeys',
+				type: 'string',
+				default: '',
+				required: false,
+				description: 'Keys to hold down while performing the action (separated by commas)',
+				displayOptions: {
+					show: {
+						resource: ['instance'],
+						operation: ['computerAction'],
+						computerAction: ['mouse_click', 'type', 'mouse_move', 'scroll'],
+					},
+				},
+			},
+			{
 				displayName: 'Coordinates [x, y]',
 				name: 'coordinates',
 				type: 'fixedCollection',
-				default: {},
+				required: true,
+				default: {
+					'x': 0,
+					'y': 0,
+				},
 				typeOptions: {
 					multipleValues: false,
 				},
@@ -326,7 +405,7 @@ export class Scrapybara implements INodeType {
 					show: {
 						resource: ['instance'],
 						operation: ['computerAction'],
-						computerAction: ['mouse_move', 'left_click_drag', 'scroll'],
+						computerAction: ['mouse_move', 'mouse_click', 'scroll'],
 					},
 				},
 				options: [
@@ -353,6 +432,37 @@ export class Scrapybara implements INodeType {
 				],
 				description: 'Coordinates for mouse actions',
 			},
+
+			{
+				displayName: 'Delta X',
+				name: 'deltaX',
+				type: 'number',
+				required: false,
+				default: 0,
+				description: 'Delta X',
+				displayOptions: {
+					show: {
+						resource: ['instance'],
+						operation: ['computerAction'],
+						computerAction: ['scroll'],
+					},
+				},
+			},
+			{
+				displayName: 'Delta Y',
+				name: 'deltaY',
+				type: 'number',
+				required: false,
+				default: 0,
+				description: 'Delta Y',
+				displayOptions: {
+					show: {
+						resource: ['instance'],
+						operation: ['computerAction'],
+						computerAction: ['scroll'],
+					},
+				},
+			},
 		],
 	};
 
@@ -375,8 +485,16 @@ export class Scrapybara implements INodeType {
 
 				// INSTANCE OPERATIONS
 				if (resource === 'instance') {
+
+
+					// LIST INSTANCES
+					if (operation === 'listInstances') {
+						const instances = await client.getInstances();
+						responseData = { success: true, instances };
+					}
+
 					// START INSTANCE
-					if (operation === 'start') {
+					else if (operation === 'start') {
 						const instanceType = this.getNodeParameter('instanceType', i) as string;
 						const timeoutHours = this.getNodeParameter('timeoutHours', i, 1) as number;
 						
@@ -396,25 +514,8 @@ export class Scrapybara implements INodeType {
 					else if (operation === 'stop') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								await clientAny.instance(instanceId).stop();
-							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								await clientAny.instances[instanceId].stop();
-							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].stop === 'function') {
-								await clientAny[instanceId].stop();
-							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
-							}
+							const instance = await client.get(instanceId)
+							await instance.stop();
 							responseData = { success: true, instanceId };
 						} catch (error) {
 							throw new Error(`Failed to stop instance ${instanceId}: ${error.message}`);
@@ -425,25 +526,8 @@ export class Scrapybara implements INodeType {
 					else if (operation === 'pause') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								await clientAny.instance(instanceId).pause();
-							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								await clientAny.instances[instanceId].pause();
-							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].pause === 'function') {
-								await clientAny[instanceId].pause();
-							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
-							}
+							const instance = await client.get(instanceId)
+							await instance.pause();
 							responseData = { success: true, instanceId };
 						} catch (error) {
 							throw new Error(`Failed to pause instance ${instanceId}: ${error.message}`);
@@ -455,25 +539,8 @@ export class Scrapybara implements INodeType {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						const timeoutHours = this.getNodeParameter('timeoutHours', i, 1) as number;
 						try {
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								await clientAny.instance(instanceId).resume({ timeoutHours });
-							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								await clientAny.instances[instanceId].resume({ timeoutHours });
-							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].resume === 'function') {
-								await clientAny[instanceId].resume({ timeoutHours });
-							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
-							}
+							const instance = await client.get(instanceId)
+							await instance.resume({ timeoutHours });
 							responseData = { success: true, instanceId };
 						} catch (error) {
 							throw new Error(`Failed to resume instance ${instanceId}: ${error.message}`);
@@ -484,27 +551,9 @@ export class Scrapybara implements INodeType {
 					else if (operation === 'screenshot') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
-							let response;
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								response = await clientAny.instance(instanceId).screenshot();
-							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								response = await clientAny.instances[instanceId].screenshot();
-							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].screenshot === 'function') {
-								response = await clientAny[instanceId].screenshot();
-							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
-							}
-							responseData = response as unknown as IDataObject;
+							const instance = await client.get(instanceId)
+							const screenshot = await instance.screenshot();
+							responseData = { success: true, instanceId, screenshot };
 						} catch (error) {
 							throw new Error(`Failed to capture screenshot of instance ${instanceId}: ${error.message}`);
 						}
@@ -514,118 +563,161 @@ export class Scrapybara implements INodeType {
 					else if (operation === 'getStreamUrl') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						try {
-							let response;
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								response = await clientAny.instance(instanceId).getStreamUrl();
-							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								response = await clientAny.instances[instanceId].getStreamUrl();
-							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].getStreamUrl === 'function') {
-								response = await clientAny[instanceId].getStreamUrl();
-							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
-							}
-							responseData = response as unknown as IDataObject;
+							const instance = await client.get(instanceId)
+							const streamUrl = await instance.getStreamUrl();
+							responseData = { success: true, instanceId, streamUrl };
 						} catch (error) {
 							throw new Error(`Failed to get stream URL of instance ${instanceId}: ${error.message}`);
 						}
 					}
-					
+
 					// RUN BASH COMMAND
 					else if (operation === 'runBashCommand') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
 						const command = this.getNodeParameter('command', i) as string;
 						const restart = this.getNodeParameter('restart', i, false) as boolean;
-						
+
 						try {
-							let response;
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								response = await clientAny.instance(instanceId).bash({ command, restart });
-							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								response = await clientAny.instances[instanceId].bash({ command, restart });
-							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].bash === 'function') {
-								response = await clientAny[instanceId].bash({ command, restart });
-							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
-							}
-							responseData = response as unknown as IDataObject;
+							const instance = await client.get(instanceId) as UbuntuInstance;
+							const bashRequest: BashRequest = {
+								command,
+								restart,
+							};
+							const result = await instance.bash(bashRequest);
+							responseData = { success: !result.error, instanceId, result };
 						} catch (error) {
-							throw new Error(`Failed to execute bash command on instance ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to run bash command on instance ${instanceId}: ${error.message}`);
 						}
 					}
-					
+
 					// COMPUTER ACTION
 					else if (operation === 'computerAction') {
 						const instanceId = this.getNodeParameter('instanceId', i) as string;
-						const action = this.getNodeParameter('computerAction', i) as string;
-						
-						const payload: {
-							action: string;
-							text?: string;
-							coordinate?: number[];
-						} = { action };
+						const action = this.getNodeParameter('computerAction', i) as any;
 
-						// Add text parameter if needed
-						if (['key', 'type'].includes(action)) {
-							payload.text = this.getNodeParameter('text', i) as string;
-						}
-						
-						// Add coordinates if needed
-						if (['mouse_move', 'left_click_drag', 'scroll'].includes(action)) {
-							const coordinatesCollection = this.getNodeParameter('coordinates', i) as IDataObject;
-							const coordinate = coordinatesCollection.coordinate as IDataObject;
-							
-							if (coordinate) {
-								payload.coordinate = [
-									coordinate.x as number,
-									coordinate.y as number,
-								];
-							}
-						}
-						
 						try {
-							let response;
-							// Try different approaches to access and manipulate the instance
-							const clientAny = client as any;
-							
-							// Approach 1: Try to use instance() method if exists
-							if (typeof clientAny.instance === 'function') {
-								response = await clientAny.instance(instanceId).computer(payload);
+							const instance = await client.get(instanceId);
+
+							if (action === 'mouse_move') {
+								// coordinates: [x, y] coordinates to move to (required)
+								// hold_keys: List of modifier keys to hold during the action (optional, defaults to [])
+
+								const coordinatesData = this.getNodeParameter('coordinates', i) as IDataObject;
+								console.log(coordinatesData);
+								const coordinates = [Number(coordinatesData['x']), Number(coordinatesData['y'])];
+								const holdKeys = this.getNodeParameter('holdKeys', i) as string;
+
+
+								const result = await instance.computer({
+									action: 'move_mouse',
+									coordinates,
+									holdKeys: holdKeys ? holdKeys.split(',') : undefined,
+								});
+								responseData = { success: !result.error, instanceId, result };
 							}
-							// Approach 2: Try to access instances map
-							else if (clientAny.instances && clientAny.instances[instanceId]) {
-								response = await clientAny.instances[instanceId].computer(payload);
+							else if (action === 'mouse_click') {
+								// button: Mouse button to click (“left”, “right”, “middle”, “back”, “forward”) (required)
+								// click_type: Type of click action (“down”, “up”, “click”) (optional, defaults to “click”)
+								// coordinates: [x, y] coordinates to click at (optional)
+								// num_clicks: Number of clicks (optional, defaults to 1)
+								// hold_keys: List of modifier keys to hold during the action (optional, defaults to [])
+
+								const button = this.getNodeParameter('button', i) as any;
+								const coordinatesData = this.getNodeParameter('coordinates', i) as any;
+								const coordinates = [Number(coordinatesData['coordinate']['x']), Number(coordinatesData['coordinate']['y'])];
+								const numClicks = this.getNodeParameter('numClicks', i) as number;
+								const holdKeys = this.getNodeParameter('holdKeys', i) as any;
+
+								const result = await instance.computer({
+									action: 'click_mouse',
+									button,
+									coordinates,
+									numClicks,
+									holdKeys: holdKeys ? holdKeys.split(',') : undefined,
+								});
+								responseData = { success: !result.error, instanceId, result };
 							}
-							// Approach 3: Try to access directly via indexer
-							else if (clientAny[instanceId] && typeof clientAny[instanceId].computer === 'function') {
-								response = await clientAny[instanceId].computer(payload);
+							// scroll
+							else if (action === 'scroll') {
+								// coordinates: [x, y] coordinates to scroll at (required)
+								// delta_x: Horizontal scroll amount (optional, defaults to 0)
+								// delta_y: Vertical scroll amount (optional, defaults to 0)
+								// hold_keys: List of modifier keys to hold during the action (optional, defaults to [])
+
+								const coordinatesData = this.getNodeParameter('coordinates', i) as IDataObject;
+								const coordinates = [Number(coordinatesData['x']), Number(coordinatesData['y'])];
+								const deltaX = this.getNodeParameter('deltaX', i) as number;
+								const deltaY = this.getNodeParameter('deltaY', i) as number;
+								const holdKeys = this.getNodeParameter('holdKeys', i) as any;
+
+								const result = await instance.computer({
+									action: 'scroll',
+									coordinates,
+									deltaX,
+									deltaY,
+									holdKeys: holdKeys ? holdKeys.split(',') : undefined,
+								});
+								responseData = { success: !result.error, instanceId, result };
 							}
-							// No approach worked
-							else {
-								throw new Error(`Unable to find or manipulate instance ${instanceId}`);
+							// key
+							else if (action === 'key') {
+								// keys: List of keys to press (required)
+								// duration: Time to hold keys in seconds (optional)
+
+								const keys = this.getNodeParameter('keys', i) as string;
+								const duration = this.getNodeParameter('duration', i) as number;
+
+								const result = await instance.computer({
+									action: 'press_key',
+									keys: keys.split(','),
+									duration,
+								});
+								responseData = { success: !result.error, instanceId, result };
 							}
-							responseData = response as unknown as IDataObject;
+							// type
+							else if (action === 'type') {
+								// text: Text to type (required)
+								// hold_keys: List of modifier keys to hold while typing (optional)
+
+								const text = this.getNodeParameter('text', i) as string;
+								const holdKeys = this.getNodeParameter('holdKeys', i) as string;
+
+								const result = await instance.computer({
+									action: 'type_text',
+									text,
+									holdKeys: holdKeys ? holdKeys.split(',') : undefined,
+								});
+								responseData = { success: !result.error, instanceId, result };
+							}
+							// wait
+							else if (action === 'wait') {
+								// duration: Time to wait in seconds (required)
+
+								const duration = this.getNodeParameter('duration', i) as number;
+
+								const result = await instance.computer({
+									action: 'wait',
+									duration,
+								});
+								responseData = { success: !result.error, instanceId, result };
+							}
+							// cursor_position
+							else if (action === 'cursor_position') {
+								// get current mouse cursor coordinates
+								const result = await instance.computer({
+									action: 'get_cursor_position',
+								});
+								responseData = { success: !result.error, instanceId, result };
+							}
+							// screenshot
+							else if (action === 'screenshot') {
+								const result = await instance.computer({
+									action: 'take_screenshot',
+								});
+								responseData = { success: !result.error, instanceId, result };
+							}
 						} catch (error) {
-							throw new Error(`Failed to execute computer action on instance ${instanceId}: ${error.message}`);
+							throw new Error(`Failed to perform computer action on instance ${instanceId}: ${error.message}`);
 						}
 					}
 				}
